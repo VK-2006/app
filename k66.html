@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cal+Sans&family=Dancing+Script:wght@400..700&family=Montserrat:wght@590&family=Oswald:wght@200..700&family=Savate:ital,wght@0,200..900;1,200..900&family=TASA+Explorer:wght@400..800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wikipedia Search Application</title>
+  <style>
+    #main-container{
+      border-radius: 30px;
+      border: 5px black solid;
+    }
+    #wikiimg{
+      height: 500px;
+      width: 500px;
+      image-resolution: 10px;
+      padding-bottom: 30px;
+    }
+    #wikipedia{
+      border: 5px black solid;
+      background: linear-gradient(to right,rgb(23, 249, 23),gold,purple,aqua);
+      text-align: center;
+      box-sizing: content-box;
+      padding-top: 30px;
+      padding-bottom: 40px;
+      border-radius: 25px;
+      animation: anim 3s alternate infinite;
+    }
+
+    #searchinp{
+      caret-color: rgb(255, 4, 25);
+      width: 500px;
+      height: 35px;
+      border-radius: 20px;
+      padding: 10px 10px 10px 10px;
+      font-size: 25px;
+      font-family: "Cal Sans", sans-serif;
+      color: black;
+      font-weight: 400;
+      font-style: normal;
+      background-color: aquamarine;
+    }
+    #loading{
+      display: none;
+    }
+    .result-item {
+      margin-bottom: 20px;
+      padding-left: 10px;
+    }
+
+    .result-title {
+      font-size: 22px;
+    }
+
+    .link-description {
+      font-size: 15px;
+      color: #444444;
+    }
+    .resultsdiv{
+      display: inline;
+      padding-left: 50px;
+    }
+    .result-url {
+      color: #006621;
+      text-decoration: none;
+    }
+    @media (max-width:500px){
+      body{
+        height: 900px;
+        margin: auto;
+      }
+      #main-container{
+        max-height: 900px;
+        max-width: 450px;
+      }
+      #wikiimg{
+        height: 300px;
+        width: 300px;
+        padding-top: 150px;
+      }
+      #searchinp{
+        height: 20px;
+        width: 300px;
+        padding: 10px 10px 10px 10px;
+      }
+    }
+    @media (max-height:900px) and (max-width:500px) {
+      #main-container{
+      height: 700px;
+      max-width: 450px;
+      }
+      #wikiimg{
+      height: 200px;
+      width: 200px;
+      }
+      #searchinp{
+      height: 20px;
+      width: 300px;
+      padding: 10px 10px 10px 10px;
+      }
+      .result-item {
+      margin-bottom: 20px;
+      }
+    }
+    @media (min-width:501px) and (max-width:900px) {
+      #main-container{
+      max-width: 700px;
+      }
+      #wikiimg{
+      height: 350px;
+      width: 350px;
+      }
+      #searchinp{
+      width: 400px;
+      height: 30px;
+      }
+    }
+    @media (min-width:901px) {
+      #main-container{
+      max-width: 900px;
+      }
+      #wikiimg{
+      height: 500px;
+      width: 500px;
+      }
+      #searchinp{
+      width: 500px;
+      height: 35px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="main-container">
+    <div id="wikipedia">
+      <a href="k66.html">
+        <img src="https://cdn.freebiesupply.com/images/large/2x/wikipedia-logo-transparent.png" alt="" id="wikiimg">
+      </a>
+      <br>
+      <input type="search" id="searchinp" placeholder="Enter the word and press Enter key">
+      <h2 id="loading">Loading...</h2>
+    </div>
+    <div id="resultsdiv"></div>
+  </div>
+  <script>
+    let searchinp = document.getElementById('searchinp');
+    let results = document.getElementById("resultsdiv");
+
+    function createAndAppendResult(res){
+      let { title, link, description } = res;
+
+      let resultEl = document.createElement('div');
+      resultEl.classList.add("result-item");
+
+      let resultTitleEl = document.createElement("a");
+      resultTitleEl.classList.add('result-title');
+      resultTitleEl.textContent = title;
+      resultTitleEl.href = link;
+      resultTitleEl.target = "_blank";
+      resultEl.appendChild(resultTitleEl);
+
+      let titleElbreak = document.createElement('br');
+      resultEl.appendChild(titleElbreak);
+
+      let urlEl = document.createElement('a');
+      urlEl.classList.add("result-url");
+      urlEl.href = link;
+      urlEl.target = "_blank";
+      urlEl.textContent = link;
+      resultEl.appendChild(urlEl);
+
+      let br = document.createElement('br');
+      resultEl.appendChild(br);
+
+      let descriptionEl = document.createElement("p");
+      descriptionEl.textContent = description;
+      descriptionEl.classList.add("link-description");
+      resultEl.appendChild(descriptionEl);
+
+      // Add Wikipedia article preview as an iframe
+      let iframeEl = document.createElement('iframe');
+      iframeEl.src = link;
+      iframeEl.width = "100%";
+      iframeEl.height = "200";
+      iframeEl.style.border = "1px solid #ccc";
+      iframeEl.loading = "lazy";
+      resultEl.appendChild(iframeEl);
+
+      results.appendChild(resultEl);
+    }
+    
+    function displayResult(searchResult){
+      for(let res of searchResult){
+       createAndAppendResult(res);
+      }
+    }
+    
+    
+    function searchWikipedia(event){
+      let search = searchinp.value;
+      if(event.key === "Enter"){
+        let options = {
+          method:"GET",
+        }
+        let url = "https://apis.ccbp.in/wiki-search?search=" + search;
+        fetch(url,options)
+        .then(function(response){
+          return response.json();
+        })
+        .then(function(jsonData){
+          console.log(jsonData);
+          let {search_results} = jsonData;
+          displayResult(search_results);
+        })
+      }
+    }
+    searchinp.addEventListener("keydown",searchWikipedia);
+  </script>
+</body>
+</html>
